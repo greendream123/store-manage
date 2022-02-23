@@ -1,0 +1,95 @@
+@font-face {
+  font-family: "store"; /* Project id 2757270 */
+  src: url('iconfont.woff2?t=1631775375972') format('woff2'),
+       url('iconfont.woff?t=1631775375972') format('woff'),
+       url('iconfont.ttf?t=1631775375972') format('truetype');
+}
+
+.store {
+  font-family: "store" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.store-chart:before {
+  content: "\e65f";
+}
+
+.store-yeartrend:before {
+  content: "\e65e";
+}
+
+.store-profit:before {
+  content: "\e65d";
+}
+
+.store-sale:before {
+  content: "\e65c";
+}
+
+.store-purchaselog:before {
+  content: "\e65b";
+}
+
+.store-salelog:before {
+  content: "\e65a";
+}
+
+.store-log:before {
+  content: "\e659";
+}
+
+.store-account:before {
+  content: "\e655";
+}
+
+.store-repertory:before {
+  content: "\e651";
+}
+
+.store-drink:before {
+  content: "\e64e";
+}
+
+.store-food:before {
+  content: "\e64f";
+}
+
+.store-commodity:before {
+  content: "\e650";
+}
+
+.store-add:before {
+  content: "\e646";
+}
+
+.store-edit:before {
+  content: "\e647";
+}
+
+.store-english:before {
+  content: "\e648";
+}
+
+.store-refresh:before {
+  content: "\e649";
+}
+
+.store-chinese:before {
+  content: "\e64a";
+}
+
+.store-home:before {
+  content: "\e64b";
+}
+
+.store-trash:before {
+  content: "\e64c";
+}
+
+.store-storage:before {
+  content: "\e64d";
+}
+
