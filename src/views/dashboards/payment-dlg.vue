@@ -11,7 +11,7 @@
   </el-dialog>
 </template>
 <script setup>
-import { ref, defineEmits, defineExpose } from 'vue'
+import { ref } from 'vue'
 import { isEmpty } from '@/libs/common.js'
   const emit = defineEmits(['save-ok'])
   // dlg 展示控制器

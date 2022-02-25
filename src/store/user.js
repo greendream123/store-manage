@@ -4,14 +4,12 @@ import { isEmpty } from '@/libs/common.js'
 export default {
   state: {
     loginedUser: {},
-    accountInfo: {},
   },
   mutations: {
     setLoginedUser(state, user) {
       state.loginedUser = user
       localSet('loginedUser', user)
-    },
-    setAccountInfo(state, info) { state.accountInfo = info },
+    }
   },
   getters: {
     loginedUser(state) {

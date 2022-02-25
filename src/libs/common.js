@@ -58,13 +58,11 @@ const apiRequestInternal = (url, method, param, cb, useAPIData) => {
     }
     return
   }
-
   if (method === 'GET' && param) { // GET 情况拼接将参数拼接进 url
     url += (url.indexOf('?') === -1) ? '?' : '&' // 已经有 ? 则加 &
     url += 'data='
     url += encodeURIComponent(JSON.stringify(param))
   }
-
   axios({
     url: `http://127.0.0.1:7001${url}`,
     method: method,
@@ -211,4 +209,25 @@ export const generateOrderNumber = () => {
   if (_seconds < 10) _seconds = '=' + _seconds
   orderNumber = `${_year}${_month}${_date}${_hour}${_minutes}${_seconds}`
   return orderNumber
+}
+
+// 库存数量 显示为 件 => 箱 + 件
+export const smallUnitToBigUnit = (count, unit) => {
+  const boxCount = Math.floor(count / unit)
+  const otherCount = count % unit
+  return { boxCount, otherCount }
+}
+// 入库数量  箱(num1) + 件(num2) => 件(unit)
+export const bigUnitToSmallUnit = (num1, num2, unit) => {
+  num1 = num1 < 0 ? num1 = 0 : num1
+  return num1 * unit + num2
+}
+// 判断是否是大于0的数字
+export const isGreaterZeroNumber = (num) => {
+  if (isEmpty(num)) return false
+  let _num = parseInt(num)
+  if (typeof _num === 'number' && !isNaN(_num) && _num > -1) {
+    return true
+  }
+  return false
 }

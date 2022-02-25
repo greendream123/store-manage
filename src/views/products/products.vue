@@ -1,15 +1,16 @@
 <template>
   <el-card style="height: 99%">
-    <TableActionBar ref="actionBar" @on-action="onBarAction" :actions="actions" />
+    <TableActionBar ref="actionBar" @on-action="onBarAction" :actions="actions" @on-search="onSearch" />
     <el-table ref="productTable" :data="products" :max-height="tabMaxHeight" border stripe @selection-change="selectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column prop="code" :label="$t('productCode')" width="240"></el-table-column>
       <el-table-column prop="img" :label="$t('productImage')" width="240"></el-table-column>
-      <el-table-column prop="type" :label="$t('productType')" width="180"></el-table-column>
+      <el-table-column prop="type" :label="$t('productType')" ></el-table-column>
       <el-table-column prop="name" :label="$t('productName')" ></el-table-column>
       <el-table-column prop="cost" :label="$t('productCost')" width="180"></el-table-column>
-      <el-table-column prop="price" :label="$t('productPrice')" width="180"></el-table-column>
-      <el-table-column prop="s_count" :label="$t('productInventory')" width="180"></el-table-column>
+      <el-table-column prop="price" :label="$t('productPrice')" width="170"></el-table-column>
+      <el-table-column prop="s_count" :label="$t('productInventory')" width="110"></el-table-column>
+      <el-table-column prop="unit" :label="$t('productUnit')" width="100"></el-table-column>
       <el-table-column prop="inTime" :label="$t('storageTime')" width="180"></el-table-column>
     </el-table>
     <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" class="page-style"
@@ -20,7 +21,8 @@
 </template>
 <script setup>
 import { ref, reactive, onMounted, getCurrentInstance, toRefs, defineProps } from 'vue'
-import { isEmpty, standardAPIRequest, showError, showSuccess, clone, i18n, getSingleSelection, getSelection, showConfirm } from '@/libs/common.js'
+import { isEmpty, standardAPIRequest, showError, showSuccess, clone, i18n, 
+getSingleSelection, getSelection, showConfirm } from '@/libs/common.js'
 import APIs from '@/libs/api.js'
 import TableActionBar from '@c/table-action-bar'
 import ProductAddEdit from './products-add-edit.vue'
@@ -33,11 +35,13 @@ import { useI18n } from 'vue-i18n'
   const { proxy } = getCurrentInstance()
   // tabbar
   const actions = reactive({
-    add: 'add',
-    edit: 'edit',
-    delete: 'delete',
-    refresh: 'refresh',
+    add: i18n(t, 'add'),
+    edit: i18n(t, 'edit'),
+    delete: i18n(t, 'delete'),
+    refresh: i18n(t, 'refresh'),
+    search: i18n(t, 'search'),
   })
+  const searchText = ref('')
   const productAddEdit = ref(null)
   const onBarAction = (action) => {
     if (action == 'add') {
@@ -105,6 +109,10 @@ import { useI18n } from 'vue-i18n'
       editProduct(curPro.value)
     }
   }
+  const onSearch = (text) => {
+    searchText.value = text
+    loadData()
+  }
 
   // table
   // height
@@ -123,19 +131,18 @@ import { useI18n } from 'vue-i18n'
   const loadData = () => {
     // 请求商品总量（多少种商品
     let data = {}
-    if (productType.value != null) data = { type: i18n(t, productType.value) }
-    standardAPIRequest(APIs.getProductCount, data, (ok, desc, _count) => {
+    standardAPIRequest(APIs.getProductCount, buildQueryParam(), (ok, desc, _count) => {
       if (!ok) {
         showError(desc)
       } else {
         productCount.value = _count
         // 根据页码及每页数量请求数据
         if (_count > 0) {
-          let data = { currentPage: currentPage.value, currentPageSize:currentPageSize.value }
-          if (productType.value != null) data.type = i18n(t, productType.value)
-          standardAPIRequest(APIs.getProducts, data, (ok, desc, _products) => {
+          standardAPIRequest(APIs.getProducts, buildQueryParam(), (ok, desc, _products) => {
             if (ok) {
-              products.value = clone(_products)
+              if (!isEmpty(_products)) {
+                products.value = clone(_products)
+              }
             } else {
               showError(desc)
             }
@@ -145,6 +152,24 @@ import { useI18n } from 'vue-i18n'
         }
       }
     })
+  }
+  const buildQueryParam = () => {
+    let query = { currentPage: currentPage.value, currentPageSize: currentPageSize.value }
+    let hasWhere = false
+    if (productType.value) {
+      query.where = `type='${i18n(t, productType.value)}'`
+      hasWhere = true
+    }
+    if (searchText.value) {
+      if (hasWhere) {
+        query.where += ' and '
+      } else {
+        query.where = ''
+      }
+      query.where += `name like '%${searchText.value}%'`
+      hasWhere = true
+    }
+    return query
   }
 
   //page

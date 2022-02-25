@@ -10,8 +10,10 @@
     :validators=[priceValidator] />
     <ValidateInput ref="productPrice" v-model:iValue="curPro.price" :label="$t('productPrice')" :lStyle="{width:'100px'}" :iStyle="{width:'308px'}" 
     :validators=[priceValidator] />
-    <ValidateInput ref="productInventory" v-model:iValue="curPro.s_count" :label="$t('productInventory')" :lStyle="{width:'100px'}" :iStyle="{width:'308px'}" 
-    :validators=[countValidator] />
+    <ValidateInput ref="productInventory" v-model:iValue="curPro.s_count" v-show="isAdd || userInfo.role === 'super'" :label="$t('productInventory')" 
+    :lStyle="{width:'100px'}" :iStyle="{width:'308px'}" :validators=[countValidator] />
+    <ValidateInput ref="productUnit" v-model:iValue="curPro.unit" :label="$t('productUnit')" :lStyle="{width:'100px'}" :iStyle="{width:'308px'}" 
+    :validators=[unitValidator] />
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="btnClose">{{$t('btnCancel')}}</el-button>
@@ -20,130 +22,122 @@
     </template>
   </el-dialog>
 </template>
-<script>
-import { ref, getCurrentInstance, onMounted } from 'vue'
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { useStore } from "vuex"
 import { useI18n } from 'vue-i18n'
-import { isEmpty, clone, i18n } from '@/libs/common.js'
+import { isEmpty, clone, i18n, isGreaterZeroNumber } from '@/libs/common.js'
 import ValidateInput from '@c/validate-input/validate-input.vue'
 import ValidateSelect from '@c/validate-select/validate-select.vue'
-export default {
-  components: {
-    ValidateInput,
-    ValidateSelect
-  },
-  emits: ['on-add-edit'],
-  setup(props, ctx) {
-    const { t } = useI18n()
-    const { proxy } = getCurrentInstance()
-    let productTypes = ref([])
-    let visible = ref(false)
-    let title = ref('')
-    let curPro = ref({})
-    let isAdd = ref(true)
-    let products = ref([])
-    
-    const show = (_products, _isAdd, editPro) => {
-      products.value = _products.value
-      isAdd.value = _isAdd
-      title.value = i18n(t, 'addProduct')
-      productTypes.value = [i18n(t, 'commodity'), i18n(t, 'foods'), i18n(t, 'drinks')]
-      if (!_isAdd) {
-        title.value = i18n(t, 'editProduct')
-        curPro.value = clone(editPro)
-      }
-      visible.value = true
-    }
-
-    onMounted(() => {
+  const emit = defineEmits(['on-add-edit'])
+  const { t } = useI18n()
+  let productTypes = ref([])
+  let visible = ref(false)
+  let title = ref('')
+  let curPro = ref({})
+  let isAdd = ref(true)
+  let products = ref([])
+  
+  const show = (_products, _isAdd, editPro) => {
+    products.value = _products.value
+    isAdd.value = _isAdd
+    title.value = i18n(t, 'addProduct')
+    productTypes.value = [i18n(t, 'commodity'), i18n(t, 'foods'), i18n(t, 'drinks')]
+    if (!_isAdd) {
       title.value = i18n(t, 'editProduct')
-    })
-
-    const btnClose = () => {
-      visible.value = false
-      curPro.value = {}
+      curPro.value = clone(editPro)
     }
-    const btnOk = () => {
-      for (const input of [productCode, productType, productName, productCost, productPrice, productInventory]) {
+    visible.value = true
+  }
+
+  // 只有role==super才可以直接修改库存
+  const store = useStore()
+  const userInfo = computed(() => store.getters.loginedUser)
+
+  onMounted(() => {
+    title.value = i18n(t, 'editProduct')
+  })
+
+  const btnClose = () => {
+    visible.value = false
+    curPro.value = {}
+  }
+  const btnOk = () => {
+    for (const input of [productCode, productType, productName, productCost, productPrice, productInventory, productUnit]) {
+      if (!input.value.validate()) return
+    }
+    if (isAdd.value || userInfo.role === 'super') {
+      for (const input of [productInventory]) {
         if (!input.value.validate()) return
       }
-      curPro.value.inTime = new Date().getTime()
-      ctx.emit('on-add-edit', curPro, isAdd.value)
     }
+    curPro.value.inTime = new Date().getTime()
+    emit('on-add-edit', curPro, isAdd.value)
+  }
 
-    const productCode = ref(null)
-    const productType = ref(null)
-    const productName = ref(null)
-    const productCost = ref(null)
-    const productPrice = ref(null)
-    const productInventory = ref(null)
-    const codeValidator = (text) => {
-      if (isEmpty(text)) {
-        return i18n(t, 'notEmpty')
+  const productCode = ref(null)
+  const codeValidator = (text) => {
+    if (isEmpty(text)) {
+      return i18n(t, 'notEmpty')
+    } else {
+      let isExist = products.value.filter(pro => pro.code == text)
+      if (isAdd.value) {
+        if (isExist.length > 0) return i18n(t, 'alreadyExist')
       } else {
-        let isExist = products.value.filter(pro => pro.code == text)
-        if (isAdd.value) {
-          if (isExist.length > 0) return i18n(t, 'alreadyExist')
-        } else {
-          if (isExist.length > 1) return i18n(t, 'alreadyExist')
-        }
+        if (isExist.length > 1) return i18n(t, 'alreadyExist')
       }
     }
-    const typeValidator = (text) => {
-      if (isEmpty(text)) return i18n(t, 'notEmpty')
-    }
-    const nameValidator = (text) => {
-      if (isEmpty(text)) {
-        return i18n(t, 'notEmpty')
+  }
+  const productType = ref(null)
+  const typeValidator = (text) => {
+    if (isEmpty(text)) return i18n(t, 'notEmpty')
+  }
+  const productName = ref(null)
+  const nameValidator = (text) => {
+    if (isEmpty(text)) {
+      return i18n(t, 'notEmpty')
+    } else {
+      let isExist = products.value.filter(pro => pro.name == text && pro.type == curPro.value.type)
+      if (isAdd.value) {
+        if (isExist.length > 0) return i18n(t, 'alreadyExist')
       } else {
-        let isExist = products.value.filter(pro => pro.name == text && pro.type == curPro.value.type)
-        if (isAdd.value) {
-          if (isExist.length > 0) return i18n(t, 'alreadyExist')
-        } else {
-          if (isExist.length > 1) return i18n(t, 'alreadyExist')
-        }
+        if (isExist.length > 1) return i18n(t, 'alreadyExist')
       }
     }
-    const priceValidator = (text) => {
-      if (isEmpty(text)) {
-        return i18n(t, 'notEmpty')
-      } else {
-        if (text < 0) {
-          return i18n(t, 'inputValiPrice')
-        }
+  }
+  const productCost = ref(null)
+  const productPrice = ref(null)
+  const priceValidator = (text) => {
+    if (isEmpty(text)) {
+      return i18n(t, 'notEmpty')
+    } else {
+      if (!isGreaterZeroNumber(text)) {
+        return i18n(t, 'inputValiPrice')
       }
     }
-    const countValidator = (text) => {
-      if (isEmpty(text)) {
-        return i18n(t, 'notEmpty')
-      } else {
-        if (text < 0) {
-          return i18n(t, 'inputValiStorage')
-        }
+  }
+  const productUnit = ref(null)
+  const unitValidator = (text) => {
+    if (!isEmpty(text)) {
+      if (!isGreaterZeroNumber(text)) {
+        return i18n(t, 'inputValiNumber')
       }
     }
-    return {
-      productTypes,
-      visible,
-      title,
-      curPro,
-      isAdd,
-      show,
-      btnOk,
-      btnClose,
-      productCode,
-      productType,
-      productName,
-      productCost,
-      productPrice,
-      productInventory,
-      codeValidator,
-      typeValidator,
-      nameValidator,
-      priceValidator,
-      countValidator
+  }
+  const productInventory = ref(null)
+  const countValidator = (text) => {
+    if (isEmpty(text)) {
+      curPro.value.s_count = 0
+    } else {
+      if (!isGreaterZeroNumber(text)) {
+        return i18n(t, 'inputValiNumber')
+      }
     }
-  },
-}
+  }
+  defineExpose({
+    show,
+    btnClose
+  })
 </script>
 <style scoped>
 .dialog-footer {

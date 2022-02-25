@@ -1,5 +1,5 @@
 export default [
-  { icon: "el-icon-lx-home", index: "/dashboard", title: "dashboard" },
+  { icon: "home", index: "/dashboard", title: "dashboard" },
   { icon: 'storage', index: '1', title: 'storage',
     children: [
       { icon: 'repertory', index: '/repertory', title: 'allProduct' },

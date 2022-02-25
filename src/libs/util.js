@@ -35,8 +35,9 @@ export const setCookies = (obj, limitTime=1) => {
 
 export const getCookies = (cookieName) => {
   let re = new RegExp("\s?" + cookieName + "=([^;]+)(;|$)")
-  if (re) {
-    return document.cookie.match(re)[1]
+  let _cookie = document.cookie.match(re)
+  if (_cookie) {
+    return _cookie[1]
   } else {
     return ''
   }

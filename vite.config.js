@@ -19,18 +19,3 @@ export default defineConfig({
     port: '7001'
   },
 })
-// export default {
-//     base: './',
-//     plugins: [vue()],
-//     resolve: {
-//       alias: {
-//         '@': '/src',
-//         '@c': '/src/components'
-//       },
-//     },
-//     server: {
-//       host: '127.0.0.1',
-//       open: true, // 是否自动打开浏览器
-//       port: '7001'
-//     },
-// }

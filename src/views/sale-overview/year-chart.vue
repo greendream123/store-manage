@@ -16,11 +16,11 @@
   </el-card>
 </template>
 <script setup>
-import * as echarts from 'echarts'
 import { ref, onMounted, watch } from 'vue'
-import { isEmpty, standardAPIRequest, clone, i18n } from '@/libs/common.js'
-import APIs from '@/libs/api.js'
+import * as echarts from 'echarts'
 import { useI18n } from 'vue-i18n'
+import APIs from '@/libs/api.js'
+import { isEmpty, standardAPIRequest, clone, i18n } from '@/libs/common.js'
 import ValidateSelect from '@c/validate-select'
 
 const { t } = useI18n()
@@ -31,7 +31,7 @@ const loadYearOptions = () => {
     if (ok && !isEmpty(_options)) {
       yearOptions.value = clone(_options)
     } else {
-      yearOptions = []
+      yearOptions.value = []
     }
     if (yearOptions.value.length == 1) {
       yearOptions.value.unshift(yearOptions.value[0] - 1)

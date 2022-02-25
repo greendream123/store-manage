@@ -1,6 +1,11 @@
 <!-- 销售额图表 -->
 <template>
   <el-card class="parent-style">
+    <span class="date-picker-style">{{ $t('searchYear') }}</span>
+    <el-date-picker
+      v-model="selectYear"
+      type="year">
+    </el-date-picker>
     <div v-show="dataIsEmpty" class="text-style">
       {{$t('noData')}}
     </div>
@@ -16,19 +21,29 @@
   </el-card>
 </template>
 <script setup>
+import { ref, onMounted, watch } from 'vue'
 import * as echarts from 'echarts'
-import { ref, onMounted } from 'vue'
-import { isEmpty, standardAPIRequest, showError, showSuccess, clone, i18n } from '@/libs/common.js'
-import APIs from '@/libs/api.js'
 import { useI18n } from 'vue-i18n'
+import APIs from '@/libs/api.js'
+import { isEmpty, standardAPIRequest, showError, showSuccess, clone, i18n } from '@/libs/common.js'
 
 const { t } = useI18n()
 
-let saleInfos = ref({})
 let selectYear = ref('')
-let selectCondition = {}
-if (isEmpty(selectYear.value)) selectYear.value = new Date().getFullYear()
-selectCondition.selectYear = selectYear.value 
+if (isEmpty(selectYear.value)) {
+  selectYear.value = new Date().getFullYear() + ''
+}
+watch(
+  () => selectYear.value,
+  (newVal, oldVal) => {
+    selectCondition.year = newVal.getFullYear()
+    repeatPaint()
+  }
+)
+let selectCondition = {
+  year: selectYear.value
+}
+let saleInfos = ref({})
 const loadData = () => {
   return new Promise((res, rej) => {
     standardAPIRequest(APIs.getSaleInfos, selectCondition, (ok, desc, _infos) => {
@@ -236,7 +251,8 @@ const paintChart = (chartId, chartTitle, paintData, abscissa) => {
   window.addEventListener('resize', myChart.resize)
 }
 
-onMounted(async () => {
+// 重复绘制动作
+const repeatPaint = async () => {
   await loadData()
   await processDisplayData()
   for (const id of ['year', 'foods', 'drinks', 'commodity' ]) {
@@ -256,6 +272,10 @@ onMounted(async () => {
     }
     paintChart(id, chartTitle.value, paintData.value, foodAbscissa.value)
   }
+}
+
+onMounted(() => {
+  repeatPaint()
 })
 
 </script>
@@ -268,13 +288,19 @@ onMounted(async () => {
 .parent-style >>> .el-card__body {
   height: 100%;
 }
+
+.date-picker-style {
+  display: inline-block;
+  margin-right: 6px;
+}
+
 .content-style {
   width: 100%;
-  height: 46%
+  height: 42%;
+  margin-top: 1%;
 }
 
 .box-style {
-  /* border: 1px solid green; */
   width: 49%;
   height: 100%;
   margin: 0 0.5%;

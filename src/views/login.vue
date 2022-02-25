@@ -32,10 +32,10 @@
 import { ref, reactive, getCurrentInstance, onMounted } from "vue"
 import { useStore } from "vuex"
 import { useRouter } from "vue-router"
-import { standardAPIRequest, showError, showSuccess } from '@/libs/common.js'
-import { clearLocalStorage, localSet, setCookies } from '@/libs/util.js'
 import { useI18n } from 'vue-i18n'
 import APIs from '@/libs/api.js'
+import { standardAPIRequest, showError, showSuccess } from '@/libs/common.js'
+import { clearLocalStorage, localSet, setCookies } from '@/libs/util.js'
   const { t } = useI18n()
   // vue
   const store = useStore()
@@ -64,36 +64,31 @@ import APIs from '@/libs/api.js'
       if (valid) {
         userLogin()
       } else {
-        showError("登录失败")
         return false
       }
     })
   }
   // 设置token
   const userLogin = () => {
-    let flag = true
+    let flag = true // 防止重复点击
     if (!flag) return
     standardAPIRequest(APIs.adminLogin, param, (ok, desc, _userInfo) => {
       flag = false
       if (ok) {
-        console.log(_userInfo)
         clearLocalStorage() // 登录后清空 localStorage ，因为不同账号带的信息可能不一样
-        // 保存token
         if (_userInfo) {
-          setCookies({ 'token': _userInfo.token })
+          setCookies({ 'token': _userInfo.token }) // 保存token
           const { role, username } = _userInfo
-          setLoginedUser({ role, username })
-          showSuccess(t('loginSuccess'))
-          router.push("/home")
-        } else {
-          showError(t('loginFailed'))
+          setLoginedUser({ role, username }) // 保存账户信息
+          router.push("/home") // 登录成功 跳转首页 
         }
       } else {
-        showError(t('loginFailed'))
+        showError(desc)
       }
       flag = true
     })
   }
+  // 清空可能残留tag
   store.commit("clearTags")
   // 切换语言函数
   const setLanguage = (language) => store.commit('setLanguage', language)
