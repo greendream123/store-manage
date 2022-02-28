@@ -13,6 +13,12 @@ const app = createApp(App)
 // 注册全局svg组件
 import SvgIcon from '@c/SvgIcon/index.vue'
 app.component('SvgIcon', SvgIcon)
+// 设置网页标题
+app.directive('title', {
+  beforeMount: function(el) {
+    document.title = el.dataset.title
+  }
+})
 
 app.use(i18n)
 app.use(ElementPlus, {

@@ -34,7 +34,7 @@ import { useStore } from "vuex"
 import { useRouter } from "vue-router"
 import { useI18n } from 'vue-i18n'
 import APIs from '@/libs/api.js'
-import { standardAPIRequest, showError, showSuccess } from '@/libs/common.js'
+import { standardAPIRequest, showError, showSuccess, encodePassword } from '@/libs/common.js'
 import { clearLocalStorage, localSet, setCookies } from '@/libs/util.js'
   const { t } = useI18n()
   // vue
@@ -72,7 +72,7 @@ import { clearLocalStorage, localSet, setCookies } from '@/libs/util.js'
   const userLogin = () => {
     let flag = true // 防止重复点击
     if (!flag) return
-    standardAPIRequest(APIs.adminLogin, param, (ok, desc, _userInfo) => {
+    standardAPIRequest(APIs.adminLogin, { username: param.username, password: encodePassword(param.password) }, (ok, desc, _userInfo) => {
       flag = false
       if (ok) {
         clearLocalStorage() // 登录后清空 localStorage ，因为不同账号带的信息可能不一样

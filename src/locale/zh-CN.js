@@ -1,5 +1,5 @@
 export default {
-  webTitle: 'vite2-vue3',
+  webTitle: 'vite2-vue3-lwj',
   login: '登录',
   loginTip: 'Tips : 用户名和密码随便填写即可',
   pms: '后台管理系统',

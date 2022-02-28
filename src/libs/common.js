@@ -1,10 +1,12 @@
-import axios from 'axios'
-import APIs from './api.js'
-import apiData from './apidata.js'
 import router from '@/router.js'
+import crypto from 'crypto-js'
 import { ElMessage } from 'element-plus'
 import { ElMessageBox } from 'element-plus'
+import request from './request'
+import APIs from './api.js'
+import apiData from './apidata.js'
 import { getCookies, removeCookies } from '@/libs/util.js'
+
 
 export const isFunction = obj => {
   return typeof (obj) === typeof (() => {})
@@ -12,29 +14,7 @@ export const isFunction = obj => {
 
 // 编码一次原始密码
 export const encodePassword = (origPswd) => {
-  const crypto = require('crypto')
-  return crypto.createHash('sha1').update(origPswd).digest('hex').toLowerCase().substr(0, 16)
-}
-
-// 编码明文密码(可解密)
-export const encodePlainPswd = pswd => {
-  const base64 = window.btoa(pswd)
-  const endIdx = base64.indexOf('=')
-  const header = endIdx === -1 ? base64 : base64.substr(0, endIdx)
-  const tail = endIdx === -1 ? '' : base64.substr(endIdx)
-  let newHdr = ''
-  for (let i = 0; i < header.length - header.length % 2; ++i) {
-    if (i % 2 === 0) {
-      newHdr += header[i + 1]
-    } else {
-      newHdr += header[i - 1]
-    }
-  }
-  if (header.length % 2 === 1) {
-    newHdr += header[header.length - 1]
-  }
-
-  return newHdr + tail
+  return crypto.MD5(origPswd).toString()
 }
 
 const apiRequestInternal = (url, method, param, cb, useAPIData) => {  
@@ -63,8 +43,8 @@ const apiRequestInternal = (url, method, param, cb, useAPIData) => {
     url += 'data='
     url += encodeURIComponent(JSON.stringify(param))
   }
-  axios({
-    url: `http://127.0.0.1:7001${url}`,
+  request({
+    url: `${url}`,
     method: method,
     data: param,
     headers: { 'Cache-Control': 'no-cache', 'Authorization': getCookies('token') }
