@@ -4,14 +4,26 @@
     <el-table ref="productTable" :data="products" :max-height="tabMaxHeight" border stripe @selection-change="selectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column prop="code" :label="$t('productCode')" width="240"></el-table-column>
-      <el-table-column prop="img" :label="$t('productImage')" width="240"></el-table-column>
-      <el-table-column prop="type" :label="$t('productType')" ></el-table-column>
+      <el-table-column prop="img" :label="$t('productImage')" width="240" align="center">
+        <template #default="scope">
+          <img class="img-style" :src="`${pictureBaseUrl}${scope.row.code}.png`" :alt="$t('samplePicture')">
+        </template>
+      </el-table-column>
       <el-table-column prop="name" :label="$t('productName')" ></el-table-column>
       <el-table-column prop="cost" :label="$t('productCost')" width="180"></el-table-column>
       <el-table-column prop="price" :label="$t('productPrice')" width="170"></el-table-column>
       <el-table-column prop="s_count" :label="$t('productInventory')" width="110"></el-table-column>
       <el-table-column prop="unit" :label="$t('productUnit')" width="100"></el-table-column>
       <el-table-column prop="inTime" :label="$t('storageTime')" width="180"></el-table-column>
+      <el-table-column prop="" :label="$t('upload')+$t('samplePicture')" align="center">
+        <template #default="scope">
+          <!-- 上传示例图片 -->
+          <el-upload action="http://127.0.0.1:7001/uploadPicture" class="upload-style" :name="scope.row.code" accept=".png" :multiple="false"
+          :show-file-list="false" :on-success="uploadSuccess" :on-error="uploadError">
+            <el-button type="primary">{{$t('upload')}}{{$t('samplePicture')}}</el-button>
+          </el-upload>
+        </template>
+      </el-table-column>
     </el-table>
     <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" class="page-style"
       :page-sizes="[30, 50, 100]" :page-size="currentPageSize" layout="prev, pager, next, sizes, total" :total="productCount">
@@ -20,7 +32,8 @@
   </el-card>
 </template>
 <script setup>
-import { ref, reactive, onMounted, getCurrentInstance, toRefs, defineProps } from 'vue'
+import { ref, reactive, onMounted, toRefs } from 'vue'
+import { useRouter } from 'vue-router'
 import { isEmpty, standardAPIRequest, showError, showSuccess, clone, i18n, 
 getSingleSelection, getSelection, showConfirm } from '@/libs/common.js'
 import APIs from '@/libs/api.js'
@@ -28,11 +41,10 @@ import TableActionBar from '@c/table-action-bar'
 import ProductAddEdit from './products-add-edit.vue'
 import { useI18n } from 'vue-i18n'
   const { t } = useI18n()
-
+  const pictureBaseUrl='http://127.0.0.1:7001/public/images/'
   const props = defineProps({
     productType: { default: null, type: String }
   })
-  const { proxy } = getCurrentInstance()
   // tabbar
   const actions = reactive({
     add: i18n(t, 'add'),
@@ -44,13 +56,13 @@ import { useI18n } from 'vue-i18n'
   const searchText = ref('')
   const productAddEdit = ref(null)
   const onBarAction = (action) => {
-    if (action == 'add') {
+    if (action === 'add') {
       showAddEditDlg(products, true)
-    } else if (action == 'edit') {
+    } else if (action === 'edit') {
       let el = getSingleSelection(t, sels.value)
       if (isEmpty(el)) return
       showAddEditDlg(products, false, el)
-    } else if (action == 'delete') {
+    } else if (action === 'delete') {
       let els = ref(getSelection(t, sels.value))
       if (isEmpty(els)) return
       showConfirm(i18n(t, 'congfirmDelProducts'), i18n(t, 'confirmOperation'))
@@ -60,7 +72,7 @@ import { useI18n } from 'vue-i18n'
       .catch((err) => {
         console.log(err)
       })
-    } else if (action == 'refresh') {
+    } else if (action === 'refresh') {
       loadData()
     }
   }
@@ -130,7 +142,6 @@ import { useI18n } from 'vue-i18n'
   let products = ref(null)
   const loadData = () => {
     // 请求商品总量（多少种商品
-    let data = {}
     standardAPIRequest(APIs.getProductCount, buildQueryParam(), (ok, desc, _count) => {
       if (!ok) {
         showError(desc)
@@ -184,6 +195,15 @@ import { useI18n } from 'vue-i18n'
     currentPageSize.value = val
     loadData()
   }
+  // 上传
+  const uploadSuccess = (res) => {
+    const router = useRouter()
+    router.go(0)
+    showSuccess(i18n(t, 'upload', 'success'))
+  }
+  const uploadError = (err, file) => {
+    showError(err)
+  }
   // loadData
   onMounted(() => { 
     loadData()
@@ -198,5 +218,16 @@ import { useI18n } from 'vue-i18n'
 
 .page-style {
   margin-top: 16px;
+}
+
+.img-style {
+  width: 100px;
+  height: 100px;
+}
+
+.upload-style >>> .el-upload--text {
+  width: auto;
+  height: auto;
+  border: 0px;
 }
 </style>

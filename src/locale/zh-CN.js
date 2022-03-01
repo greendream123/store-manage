@@ -100,4 +100,7 @@ export default {
   productUnit: '单位(件/箱)',
   search: '查询',
   inputValiNumber: '请输入合法的数字',
+  samplePicture: '示例图片',
+  upload: '上传',
+  success: '成功',
 }

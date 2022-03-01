@@ -14,6 +14,7 @@
     :lStyle="{width:'100px'}" :iStyle="{width:'308px'}" :validators=[countValidator] />
     <ValidateInput ref="productUnit" v-model:iValue="curPro.unit" :label="$t('productUnit')" :lStyle="{width:'100px'}" :iStyle="{width:'308px'}" 
     :validators=[unitValidator] />
+    
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="btnClose">{{$t('btnCancel')}}</el-button>
@@ -134,6 +135,7 @@ import ValidateSelect from '@c/validate-select/validate-select.vue'
       }
     }
   }
+
   defineExpose({
     show,
     btnClose
