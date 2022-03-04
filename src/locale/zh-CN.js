@@ -103,4 +103,6 @@ export default {
   samplePicture: '示例图片',
   upload: '上传',
   success: '成功',
+  bePutInStorage: '入库',
+  count: '数量',
 }

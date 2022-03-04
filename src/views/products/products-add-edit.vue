@@ -10,7 +10,7 @@
     :validators=[priceValidator] />
     <ValidateInput ref="productPrice" v-model:iValue="curPro.price" :label="$t('productPrice')" :lStyle="{width:'100px'}" :iStyle="{width:'308px'}" 
     :validators=[priceValidator] />
-    <ValidateInput ref="productInventory" v-model:iValue="curPro.s_count" v-show="isAdd || userInfo.role === 'super'" :label="$t('productInventory')" 
+    <ValidateInput ref="productInventory" v-model:iValue="curPro.s_count" v-show="isAdd || userInfo.role === 'admin'" :label="$t('productInventory')" 
     :lStyle="{width:'100px'}" :iStyle="{width:'308px'}" :validators=[countValidator] />
     <ValidateInput ref="productUnit" v-model:iValue="curPro.unit" :label="$t('productUnit')" :lStyle="{width:'100px'}" :iStyle="{width:'308px'}" 
     :validators=[unitValidator] />
@@ -51,7 +51,7 @@ import ValidateSelect from '@c/validate-select/validate-select.vue'
     visible.value = true
   }
 
-  // 只有role==super才可以直接修改库存
+  // 只有role==admin才可以直接修改库存
   const store = useStore()
   const userInfo = computed(() => store.getters.loginedUser)
 
@@ -67,7 +67,7 @@ import ValidateSelect from '@c/validate-select/validate-select.vue'
     for (const input of [productCode, productType, productName, productCost, productPrice, productInventory, productUnit]) {
       if (!input.value.validate()) return
     }
-    if (isAdd.value || userInfo.role === 'super') {
+    if (isAdd.value || userInfo.role === 'admin') {
       for (const input of [productInventory]) {
         if (!input.value.validate()) return
       }

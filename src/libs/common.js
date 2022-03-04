@@ -5,7 +5,7 @@ import { ElMessageBox } from 'element-plus'
 import request from './request'
 import APIs from './api.js'
 import apiData from './apidata.js'
-import { getCookies, removeCookies } from '@/libs/util.js'
+import { removeCookies } from '@/libs/util.js'
 
 
 export const isFunction = obj => {
@@ -47,7 +47,6 @@ const apiRequestInternal = (url, method, param, cb, useAPIData) => {
     url: `${url}`,
     method: method,
     data: param,
-    headers: { 'Cache-Control': 'no-cache', 'Authorization': getCookies('token') }
   }).then(response => {
     if (response.status !== 200) {
       if (cb) {
@@ -205,8 +204,16 @@ export const bigUnitToSmallUnit = (num1, num2, unit) => {
 // 判断是否是大于0的数字
 export const isGreaterZeroNumber = (num) => {
   if (isEmpty(num)) return false
+  if (isNumber(_num) && _num > -1) {
+    return true
+  }
+  return false
+}
+// 判断是否为数字
+export const isNumber = (num) => {
+  if (isEmpty(num)) return false
   let _num = parseInt(num)
-  if (typeof _num === 'number' && !isNaN(_num) && _num > -1) {
+  if (typeof _num === 'number' && !isNaN(_num)) {
     return true
   }
   return false

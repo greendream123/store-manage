@@ -10,6 +10,7 @@
 </template>
 <script>
 import { reactive, toRefs, ref } from 'vue'
+import { isEmpty } from '@/libs/common.js'
 
 export default {
   props: {
@@ -22,7 +23,8 @@ export default {
     validators: Array,
     password: { type: Boolean, default: false },
     tooltipPlace: { type: String, default: 'right' },
-    isDisabled: { type: Boolean, default:false }
+    isDisabled: { type: Boolean, default:false },
+    customStyle: { type: Object, default: {} }
   },
   emits: ['update:iValue'],
   setup(props, ctx) {
@@ -31,13 +33,16 @@ export default {
     let errInfo = ref('')
     let iType = ref('iType')
 
-    const { password, validators, iValue, rightLabel, isDisabled } = toRefs(props)
+    const { password, validators, iValue, rightLabel, isDisabled, customStyle } = toRefs(props)
 
     if (password.value) {
       iType.value = 'password'
       divStyleInternal.value = { marginBottom: '8px', marginTop: '0px', display: 'inline-block' }
     } else {
       iType.value = 'text'
+    }
+    if (!isEmpty(customStyle.value)) {
+      divStyleInternal = Object.assign(divStyleInternal, customStyle.value)
     }
 
     const reset = () => { error.value = false }
